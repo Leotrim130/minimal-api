@@ -1,0 +1,43 @@
+
+services:
+  mongodb: 
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-logs:/var/log/mongodb
+      - mongo-config:/data/configdb
+    networks:
+      - backend-network
+
+  webapi:
+    container_name: webapi
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_URLS=http://*:5001
+      - DatabaseSettings__ConnectionString=mongodb://mongodb:27017
+    networks:
+      - backend-network
+      - frontend-network
+
+volumes:
+  mongo-data: 
+    name: mongo-data
+  mongo-logs:
+    name: mongo-logs
+  mongo-config:
+    name: mongo-config
+
+networks:
+  backend-network:
+    name: backend-network
+    driver: bridge
+  frontend-network:
+    name: frontend-network
+    driver: bridge
